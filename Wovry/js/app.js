@@ -356,6 +356,31 @@ function renderOrderSummary() {
     summaryTotalElem.textContent = formatPrice(subtotal);
 }
 
+// --- Global Event Listeners ---
+document.addEventListener('click', async (e) => {
+    if (e.target.classList.contains('add-to-cart-btn')) {
+        const productId = e.target.dataset.productId;
+        if (!productId) return;
+
+        try {
+            const docRef = doc(db, "products", productId);
+            const docSnap = await getDoc(docRef);
+
+            if (docSnap.exists()) {
+                const product = { id: docSnap.id, ...docSnap.data() };
+                addToCart(product);
+            } else {
+                console.error("Attempted to add a product that does not exist:", productId);
+                showMessage('Error: Could not find product.', 'error');
+            }
+        } catch (err) {
+            console.error("Error fetching product to add to cart:", err);
+            showMessage('There was an issue adding the item to your cart.', 'error');
+        }
+    }
+});
+
+
 // --- Page-Specific Logic & Event Listeners ---
 
 // Homepage Logic
@@ -702,8 +727,12 @@ if (loginForm) {
             showMessage('Logged in with Google! Redirecting...', 'success');
             setTimeout(() => window.location.href = 'profile.html', 1500);
         } catch (error) {
-            console.error("Google login failed: ", error);
-            showMessage('Google login failed. Please try again.', 'error');
+            console.error("Google login failed. Full error object:", error);
+            if (error.code) {
+                console.error("Firebase Auth Error Code:", error.code);
+                console.error("Firebase Auth Error Message:", error.message);
+            }
+            showMessage('Google login failed. Check console for details.', 'error');
         }
     });
 }
