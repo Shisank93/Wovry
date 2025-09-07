@@ -1,0 +1,76 @@
+
+.dark body {
+    background-color: #1a1a1a;
+    color: #f7f3e8;
+}
+
+.dark header {
+    background-color: #2a2a2a;
+    box-shadow: 0 2px 10px rgba(255, 255, 255, 0.05);
+}
+
+.dark .text-brown-900,
+.dark .text-white {
+    color: #f7f3e8;
+}
+
+.dark .product-card,
+.dark .bg-white,
+.dark .bg-gray-100 {
+    background-color: #2a2a2a;
+    color: #f7f3e8;
+}
+
+.dark .border-gray-300 {
+    border-color: #4a4a4a;
+}
+
+.dark input, .dark textarea, .dark select {
+    background-color: #333;
+    color: #f7f3e8;
+    border-color: #4a4a4a;
+}
+
+/* Hero Section Animation */
+@keyframes fadeInSlideUp {
+    from {
+        opacity: 0;
+        transform: translateY(20px);
+    }
+    to {
+        opacity: 1;
+        transform: translateY(0);
+    }
+}
+
+.animate-fade-in-up {
+    animation: fadeInSlideUp 0.8s ease-out forwards;
+}
+
+.animate-fade-in-up.delay-200 {
+    animation-delay: 0.2s;
+}
+.animate-fade-in-up.delay-400 {
+    animation-delay: 0.4s;
+}
+
+/* Product Card Hover Effect */
+.product-card:hover {
+    transform: translateY(-5px);
+    box-shadow: 0 10px 20px rgba(0,0,0,0.1);
+}
+.dark .product-card:hover {
+    box-shadow: 0 10px 20px rgba(255, 255, 255, 0.05);
+}
+
+/* Add-to-Cart Button Hover Effect */
+.product-card .add-to-cart-btn {
+    transform: translateY(10px);
+    opacity: 0;
+    transition: transform 0.3s, opacity 0.3s;
+}
+
+.product-card:hover .add-to-cart-btn {
+    transform: translateY(0);
+    opacity: 1;
+}

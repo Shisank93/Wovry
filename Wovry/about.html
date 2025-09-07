@@ -1,0 +1,86 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>About Us | Knit & Purl</title>
+    <script src="https://cdn.tailwindcss.com"></script>
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0-beta3/css/all.min.css">
+    <link href="https://fonts.googleapis.com/css2?family=Playfair+Display:wght@700&family=Lato:wght@400;700&display=swap" rel="stylesheet">
+    <style>
+        body { font-family: 'Lato', sans-serif; background-color: #f7f3e8; color: #333; }
+        h1, h2, h3, h4 { font-family: 'Playfair Display', serif; }
+        .btn-primary { background-color: #a0522d; color: white; transition: background-color 0.3s; }
+        .btn-primary:hover { background-color: #8b4513; }
+    </style>
+</head>
+<body>
+    <!-- Header -->
+    <header class="bg-white shadow-sm sticky top-0 z-10 py-4 px-8">
+        <nav class="flex justify-between items-center max-w-7xl mx-auto">
+            <a href="index.html" class="text-2xl font-bold tracking-widest text-brown-900">KNIT & PURL</a>
+            <div class="hidden md:flex space-x-8">
+                <a href="shop.html" class="text-brown-900 hover:text-gray-600 transition-colors">Shop</a>
+                <a href="about.html" class="text-brown-900 font-bold">About</a>
+                <a href="contact.html" class="text-brown-900 hover:text-gray-600 transition-colors">Contact</a>
+                <a href="profile.html" id="profile-link" class="text-brown-900 hover:text-gray-600 transition-colors">Account</a>
+            </div>
+            <div class="flex items-center space-x-6">
+                <a href="cart.html" id="cart-icon" class="text-brown-900 hover:text-gray-600 transition-colors relative">
+                    <i class="fas fa-shopping-bag text-xl"></i>
+                    <span id="cart-count" class="absolute -top-2 -right-2 bg-red-500 text-white text-xs rounded-full h-4 w-4 flex items-center justify-center">0</span>
+                </a>
+                <a href="profile.html" id="login-link" class="md:hidden text-brown-900 hover:text-gray-600 transition-colors">
+                    <i class="fas fa-user-circle text-xl"></i>
+                </a>
+                <button id="dark-mode-toggle" class="text-brown-900 text-xl">
+                    <i class="fas fa-moon"></i>
+                </button>
+            </div>
+        </nav>
+    </header>
+
+    <!-- About Section -->
+    <main class="py-12 px-4 md:px-8">
+        <div class="max-w-5xl mx-auto">
+            <h1 class="text-5xl font-bold mb-8 text-center">Our Story</h1>
+            <div class="flex flex-col md:flex-row gap-8 items-center mb-12">
+                <div class="md:w-1/2">
+                    <p class="text-lg leading-relaxed mb-4">Knit & Purl was born from a passion for traditional craftsmanship and the simple joy of a truly handmade item. In a world of fast fashion, we believe in the quiet beauty of slow-made garments, each one telling a unique story of skill and dedication. Our wool is sourced from ethical, sustainable farms, and every piece is meticulously crafted by a community of local artisans who pour their heart and soul into every stitch.</p>
+                    <p class="text-lg leading-relaxed">We don't just sell clothes; we offer a piece of warmth, a touch of heritage, and a connection to the hands that made it. Our mission is to preserve the art of knitting and provide our customers with timeless pieces that will be cherished for years to come.</p>
+                </div>
+                <div class="md:w-1/2">
+                    <img src="https://placehold.co/600x400/D4C19A/000?text=Handmade+Process" alt="Handmade process" class="rounded-lg shadow-xl">
+                </div>
+            </div>
+
+            <div class="grid grid-cols-2 md:grid-cols-4 gap-4 mt-12">
+                <img src="https://placehold.co/300x400/EADEC2/000?text=Spinning+Yarn" alt="Spinning yarn" class="w-full h-auto rounded-lg shadow-md">
+                <img src="https://placehold.co/300x400/D0B89C/000?text=Artisan+Work" alt="Artisan at work" class="w-full h-auto rounded-lg shadow-md">
+                <img src="https://placehold.co/300x400/B8977F/000?text=Detail+Work" alt="Detailed knitting" class="w-full h-auto rounded-lg shadow-md">
+                <img src="https://placehold.co/300x400/A0785C/000?text=Final+Product" alt="Final product" class="w-full h-auto rounded-lg shadow-md">
+            </div>
+        </div>
+    </main>
+
+    <!-- Footer -->
+    <footer class="bg-brown-900 text-white py-12 px-8 mt-12">
+        <div class="max-w-7xl mx-auto flex flex-col md:flex-row justify-between items-center text-center md:text-left">
+            <div class="mb-6 md:mb-0">
+                <h3 class="text-2xl font-bold mb-2">KNIT & PURL</h3>
+                <p>&copy; 2023 All rights reserved.</p>
+            </div>
+            <div class="flex space-x-6 text-2xl">
+                <a href="#" class="hover:text-gray-400"><i class="fab fa-instagram"></i></a>
+                <a href="#" class="hover:text-gray-400"><i class="fab fa-facebook-f"></i></a>
+                <a href="#" class="hover:text-gray-400"><i class="fab fa-pinterest"></i></a>
+            </div>
+        </div>
+    </footer>
+
+    <script type="module" src="https://www.gstatic.com/firebasejs/10.7.1/firebase-app.js"></script>
+    <script type="module" src="https://www.gstatic.com/firebasejs/10.7.1/firebase-firestore.js"></script>
+    <script type="module" src="https://www.gstatic.com/firebasejs/10.7.1/firebase-auth.js"></script>
+    <script type="module" src="js/app.js"></script>
+</body>
+</html>
