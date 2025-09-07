@@ -24,7 +24,7 @@ const analytics = getAnalytics(app);
 // --- Global Variables ---
 let lastVisible = null;
 const productsPerPage = 9;
-const ADMIN_UID = "YOUR_ADMIN_UID_HERE"; // Replace with the UID of your admin account
+const ADMIN_UID = "QHnSW6f3BjZqJ13Hkw35fgg5AcJ2";
 
 // --- DOM Elements ---
 const productGrid = document.getElementById('product-grid');
@@ -46,10 +46,16 @@ const adminAuthMessage = document.getElementById('admin-not-authorized');
 const productForm = document.getElementById('product-form');
 const productListContainer = document.getElementById('product-list');
 const orderListContainer = document.getElementById('order-list');
+const loginForm = document.getElementById('login-form');
+const signupForm = document.getElementById('signup-form');
+const authToggleBtn = document.getElementById('auth-toggle');
+const authTitle = document.getElementById('auth-title');
+const authMessage = document.getElementById('auth-message');
+const googleAuthBtn = document.getElementById('google-auth-btn');
 
 // --- Helper Functions ---
 function formatPrice(price) {
-    return `$${price.toFixed(2)}`;
+    return `₹${price.toFixed(2)}`;
 }
 
 function updateCartCount() {
@@ -61,11 +67,27 @@ function updateCartCount() {
 }
 
 function showMessage(message, type = 'success') {
-    const msgBox = document.createElement('div');
-    msgBox.textContent = message;
-    msgBox.className = `fixed bottom-5 right-5 p-4 rounded-lg shadow-lg text-white ${type === 'success' ? 'bg-green-500' : 'bg-red-500'}`;
-    document.body.appendChild(msgBox);
-    setTimeout(() => msgBox.remove(), 3000);
+    if (!authMessage) return;
+    authMessage.textContent = message;
+    authMessage.className = `mt-4 p-3 text-sm text-center rounded-lg ${type === 'success' ? 'bg-green-100 text-green-700' : 'bg-red-100 text-red-700'}`;
+    authMessage.classList.remove('hidden');
+    setTimeout(() => authMessage.classList.add('hidden'), 5000);
+}
+
+function createProductCard(product) {
+    return `
+    <div class="product-card bg-white rounded-lg shadow-lg overflow-hidden group">
+        <a href="product.html?id=${product.id}">
+            <img src="${product.imageUrl}" alt="${product.name}" class="w-full h-72 object-cover transition-transform duration-500 group-hover:scale-105">
+        </a>
+        <div class="p-6">
+            <h3 class="text-xl font-bold mb-2">${product.name}</h3>
+            <p class="text-gray-600 mb-2">${product.description}</p>
+            <p class="text-2xl font-semibold text-brown-900 mb-4">${formatPrice(product.price)}</p>
+            <button class="btn-primary w-full py-3 rounded-md transition-all add-to-cart-btn" data-product-id="${product.id}">Add to Cart</button>
+        </div>
+    </div>
+    `;
 }
 
 // --- Firebase Data Fetching ---
@@ -620,6 +642,68 @@ if (adminContent) {
             } catch (e) {
                 console.error("Error fetching product for edit: ", e);
             }
+        }
+    });
+}
+
+// --- Authentication Page Logic (new) ---
+if (loginForm) {
+    // Toggle between login and signup forms
+    authToggleBtn?.addEventListener('click', (e) => {
+        e.preventDefault();
+        if (loginForm.classList.contains('hidden')) {
+            loginForm.classList.remove('hidden');
+            signupForm.classList.add('hidden');
+            authTitle.textContent = "Log In";
+            authToggleBtn.textContent = "Switch to Sign Up";
+        } else {
+            loginForm.classList.add('hidden');
+            signupForm.classList.remove('hidden');
+            authTitle.textContent = "Sign Up";
+            authToggleBtn.textContent = "Switch to Log In";
+        }
+    });
+
+    // Handle Email/Password Login
+    loginForm.addEventListener('submit', async (e) => {
+        e.preventDefault();
+        const email = document.getElementById('login-email').value;
+        const password = document.getElementById('login-password').value;
+        try {
+            await signInWithEmailAndPassword(auth, email, password);
+            showMessage('Logged in successfully!', 'success');
+            setTimeout(() => window.location.href = 'profile.html', 1500);
+        } catch (error) {
+            console.error("Login failed: ", error);
+            showMessage('Invalid email or password. Please try again.', 'error');
+        }
+    });
+
+    // Handle Email/Password Sign Up
+    signupForm.addEventListener('submit', async (e) => {
+        e.preventDefault();
+        const email = document.getElementById('signup-email').value;
+        const password = document.getElementById('signup-password').value;
+        try {
+            await createUserWithEmailAndPassword(auth, email, password);
+            showMessage('Account created successfully! Redirecting...', 'success');
+            setTimeout(() => window.location.href = 'profile.html', 1500);
+        } catch (error) {
+            console.error("Signup failed: ", error);
+            showMessage('Failed to create account. Please try again.', 'error');
+        }
+    });
+
+    // Handle Google Auth
+    googleAuthBtn?.addEventListener('click', async () => {
+        const provider = new GoogleAuthProvider();
+        try {
+            await signInWithPopup(auth, provider);
+            showMessage('Logged in with Google! Redirecting...', 'success');
+            setTimeout(() => window.location.href = 'profile.html', 1500);
+        } catch (error) {
+            console.error("Google login failed: ", error);
+            showMessage('Google login failed. Please try again.', 'error');
         }
     });
 }
