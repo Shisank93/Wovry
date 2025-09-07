@@ -356,8 +356,32 @@ function renderOrderSummary() {
     summaryTotalElem.textContent = formatPrice(subtotal);
 }
 
+// --- Dark Mode Toggle ---
+const darkModeToggle = document.getElementById('dark-mode-toggle');
+const body = document.body;
+
+const applyDarkMode = (isDark) => {
+    if (isDark) {
+        body.classList.add('dark');
+        darkModeToggle.innerHTML = '<i class="fas fa-sun"></i>';
+    } else {
+        body.classList.remove('dark');
+        darkModeToggle.innerHTML = '<i class="fas fa-moon"></i>';
+    }
+};
+
+if (localStorage.getItem('darkMode') === 'true') {
+    applyDarkMode(true);
+}
+
 // --- Global Event Listeners ---
 document.addEventListener('click', async (e) => {
+    if (e.target.id === 'dark-mode-toggle' || e.target.parentElement.id === 'dark-mode-toggle') {
+        const isDarkMode = body.classList.toggle('dark');
+        localStorage.setItem('darkMode', isDarkMode);
+        applyDarkMode(isDarkMode);
+    }
+
     if (e.target.classList.contains('add-to-cart-btn')) {
         const productId = e.target.dataset.productId;
         if (!productId) return;
