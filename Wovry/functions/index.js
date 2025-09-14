@@ -11,8 +11,13 @@
 //    - Listens for successful payment events.
 //    - Updates the order status in Firestore to 'paid'.
 
+// 3. sendWelcomeEmail:
+//    - Triggered when a new document is created in 'newsletterSubscribers'.
+//    - Sends a welcome email to the new subscriber.
+
 const functions = require("firebase-functions");
 const admin = require("firebase-admin");
+const nodemailer = require("nodemailer");
 // Initialize Stripe with the secret key from Firebase environment configuration
 const stripe = require("stripe")(functions.config().stripe.secret);
 const cors = require("cors")({ origin: true });
@@ -117,4 +122,98 @@ exports.stripeWebhook = functions.https.onRequest(async (req, res) => {
 
     // Return a 200 response to acknowledge receipt of the event
     res.status(200).send();
+});
+
+// --- Email Function for Newsletter Subscription ---
+// To make this function work, you need to configure your email service credentials
+// in the Firebase environment. From your terminal, run:
+// firebase functions:config:set email.user="YOUR_EMAIL_ADDRESS" email.pass="YOUR_EMAIL_PASSWORD_OR_APP_KEY"
+// For Gmail, you may need to use an "App Password".
+// For services like SendGrid, use the API key as the password.
+
+const mailTransport = nodemailer.createTransport({
+    // Example using Gmail. Replace with your email service provider.
+    service: 'gmail',
+    auth: {
+        user: functions.config().email.user,
+        pass: functions.config().email.pass,
+    },
+});
+
+exports.sendWelcomeEmail = functions.firestore
+    .document('newsletterSubscribers/{subscriberId}')
+    .onCreate(async (snap, context) => {
+        const data = snap.data();
+        const email = data.email;
+
+        if (!email) {
+            console.log("Subscriber document is missing email field.");
+            return;
+        }
+
+        const mailOptions = {
+            from: '"Knit & Purl" <noreply@yourdomain.com>', // Use a custom sending address
+            to: email,
+            subject: 'Welcome to the Knit & Purl Family!',
+            html: `
+                <h1>Welcome!</h1>
+                <p>Hi there,</p>
+                <p>Thank you for subscribing to the Knit & Purl newsletter. We're so happy to have you with us.</p>
+                <p>You'll now be the first to know about new arrivals, special collections, and exclusive offers.</p>
+                <p>Happy knitting!</p>
+                <br>
+                <p>Warmly,</p>
+                <p>The Knit & Purl Team</p>
+            `
+        };
+
+        try {
+            await mailTransport.sendMail(mailOptions);
+            console.log(`Successfully sent welcome email to ${email}`);
+        } catch (error) {
+            console.error('There was an error sending the email:', error);
+        }
+    });
+
+// --- Admin Dashboard Functions ---
+
+// HTTP-callable function to list all users.
+// This function is protected and can only be called by an authenticated admin.
+exports.listUsers = functions.https.onRequest((req, res) => {
+    cors(req, res, async () => {
+        // Check for authentication token
+        if (!req.headers.authorization || !req.headers.authorization.startsWith('Bearer ')) {
+            return res.status(403).send('Unauthorized: No token provided.');
+        }
+
+        // Verify the admin's token
+        const idToken = req.headers.authorization.split('Bearer ')[1];
+        try {
+            const decodedToken = await admin.auth().verifyIdToken(idToken);
+            // Hardcoded Admin UID for security check
+            const ADMIN_UID = "QHnSW6f3BjZqJ13Hkw35fgg5AcJ2";
+            if (decodedToken.uid !== ADMIN_UID) {
+                return res.status(403).send('Unauthorized: Not an admin.');
+            }
+        } catch (error) {
+            console.error("Error verifying auth token:", error);
+            return res.status(403).send('Unauthorized: Invalid token.');
+        }
+
+        // If authorized, list users
+        try {
+            const listUsersResult = await admin.auth().listUsers(1000); // Max 1000 users per page
+            const users = listUsersResult.users.map(user => ({
+                uid: user.uid,
+                email: user.email,
+                displayName: user.displayName,
+                creationTime: user.metadata.creationTime,
+                lastSignInTime: user.metadata.lastSignInTime,
+            }));
+            res.status(200).send(users);
+        } catch (error) {
+            console.error('Error listing users:', error);
+            res.status(500).send({ error: 'Failed to list users.' });
+        }
+    });
 });

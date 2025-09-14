@@ -775,14 +775,123 @@ if (profileDetails) {
     });
 }
 
-// Admin Dashboard Logic
+// --- Admin Dashboard Logic ---
+
+// Fetch analytics data for the dashboard
+async function fetchAdminAnalytics() {
+    const revenueElem = document.getElementById('stats-total-revenue');
+    const ordersElem = document.getElementById('stats-total-orders');
+    const topProductsElem = document.getElementById('stats-top-products');
+
+    if (!revenueElem) return;
+
+    try {
+        const q = query(collection(db, "orders"), where("status", "==", "paid"));
+        const querySnapshot = await getDocs(q);
+
+        let totalRevenue = 0;
+        const productSales = {};
+
+        querySnapshot.forEach(doc => {
+            const order = doc.data();
+            totalRevenue += order.total;
+            order.items.forEach(item => {
+                productSales[item.name] = (productSales[item.name] || 0) + item.quantity;
+            });
+        });
+
+        revenueElem.textContent = formatPrice(totalRevenue);
+        ordersElem.textContent = querySnapshot.size;
+
+        const sortedProducts = Object.entries(productSales).sort((a, b) => b[1] - a[1]).slice(0, 5);
+        if (sortedProducts.length > 0) {
+            topProductsElem.innerHTML = sortedProducts.map(([name, sales]) => `
+                <div class="flex justify-between items-center text-sm">
+                    <p class="font-medium text-gray-800">${name}</p>
+                    <p class="text-gray-600">${sales} sold</p>
+                </div>
+            `).join('');
+        } else {
+            topProductsElem.innerHTML = '<p class="text-gray-500">No sales data yet.</p>';
+        }
+    } catch (error) {
+        console.error("Error fetching admin analytics:", error);
+        revenueElem.textContent = 'Error';
+        ordersElem.textContent = 'Error';
+    }
+}
+
+
+// Fetch all registered users for the admin dashboard
+async function fetchAdminCustomers(token) {
+    const customerListElem = document.getElementById('customer-list');
+    const totalCustomersElem = document.getElementById('stats-total-customers');
+    if (!customerListElem) return;
+
+    try {
+        const functionUrl = 'https://us-central1-wovry-1873f.cloudfunctions.net/listUsers';
+        const response = await fetch(functionUrl, {
+            headers: {
+                'Authorization': `Bearer ${token}`
+            }
+        });
+
+        if (!response.ok) {
+            throw new Error(`Failed to fetch users: ${await response.text()}`);
+        }
+
+        const users = await response.json();
+        totalCustomersElem.textContent = users.length;
+
+        if (users.length > 0) {
+            customerListElem.innerHTML = users.map(user => `
+                <div class="p-4 border border-gray-200 rounded-lg">
+                    <p class="font-semibold">${user.displayName || 'No Name'}</p>
+                    <p class="text-sm text-gray-600">${user.email}</p>
+                    <p class="text-xs text-gray-400 mt-1">UID: ${user.uid}</p>
+                    <p class="text-xs text-gray-400">Created: ${new Date(user.creationTime).toLocaleDateString()}</p>
+                </div>
+            `).join('');
+        } else {
+            customerListElem.innerHTML = '<p>No registered customers found.</p>';
+        }
+    } catch (error) {
+        console.error("Error fetching admin customers:", error);
+        customerListElem.innerHTML = '<p class="text-red-500">Could not load customer data.</p>';
+        totalCustomersElem.textContent = 'Error';
+    }
+}
+
 if (adminContent) {
     onAuthStateChanged(auth, async (user) => {
         if (user && user.uid === ADMIN_UID) {
             adminContent.classList.remove('hidden');
             adminAuthMessage.classList.add('hidden');
+
+            // Initial data fetch
             fetchAllProducts();
             fetchAllOrders();
+            fetchAdminAnalytics();
+            const token = await user.getIdToken();
+            fetchAdminCustomers(token);
+
+            // Setup Tab functionality
+            const tabs = document.querySelectorAll('.tab-button');
+            const tabContents = document.querySelectorAll('.tab-content');
+
+            tabs.forEach(tab => {
+                tab.addEventListener('click', () => {
+                    // Deactivate all tabs
+                    tabs.forEach(t => t.classList.remove('active'));
+                    tabContents.forEach(c => c.classList.add('hidden'));
+
+                    // Activate clicked tab
+                    tab.classList.add('active');
+                    const contentId = `tab-content-${tab.id.split('-')[1]}`;
+                    document.getElementById(contentId).classList.remove('hidden');
+                });
+            });
+
         } else {
             adminContent.classList.add('hidden');
             adminAuthMessage.classList.remove('hidden');
@@ -793,38 +902,33 @@ if (adminContent) {
     productForm?.addEventListener('submit', async (e) => {
         e.preventDefault();
         const id = document.getElementById('product-id-field').value;
-
-        // Helper to process comma-separated strings into arrays
-        const processStringToArray = (str) => str.split(',').map(item => item.trim()).filter(item => item);
+        const processStringToArray = (str) => str ? str.split(',').map(item => item.trim()).filter(Boolean) : [];
 
         const name = document.getElementById('product-name').value;
         const description = document.getElementById('product-description').value;
         const category = document.getElementById('product-category').value;
 
-        // Create a keywords array for searching
-        const keywords = [
+        const keywords = [...new Set([
             ...name.toLowerCase().split(' '),
             ...description.toLowerCase().split(' '),
             category.toLowerCase()
-        ];
-        const uniqueKeywords = [...new Set(keywords.filter(k => k))];
-
+        ].filter(Boolean))];
 
         const product = {
-            name: name,
+            name,
             imageUrl: document.getElementById('product-imageUrl').value,
-            description: description,
+            description,
             price: parseFloat(document.getElementById('product-price').value),
-            category: category,
+            category,
             sizes: processStringToArray(document.getElementById('product-sizes').value),
             colors: processStringToArray(document.getElementById('product-colors').value),
             isFeatured: document.getElementById('product-isFeatured').checked,
-            keywords: uniqueKeywords
+            keywords
         };
 
         try {
             if (id) {
-                await setDoc(doc(db, "products", id), product);
+                await setDoc(doc(db, "products", id), product, { merge: true });
                 showMessage('Product updated successfully!', 'success');
             } else {
                 await addDoc(collection(db, "products"), { ...product, createdAt: new Date() });
@@ -843,13 +947,15 @@ if (adminContent) {
     productListContainer?.addEventListener('click', async (e) => {
         if (e.target.classList.contains('delete-btn')) {
             const productId = e.target.dataset.id;
-            try {
-                await deleteDoc(doc(db, "products", productId));
-                showMessage('Product deleted successfully!', 'success');
-                fetchAllProducts();
-            } catch (e) {
-                console.error("Error deleting product: ", e);
-                showMessage('Failed to delete product.', 'error');
+            if (confirm('Are you sure you want to delete this product?')) {
+                try {
+                    await deleteDoc(doc(db, "products", productId));
+                    showMessage('Product deleted successfully!', 'success');
+                    fetchAllProducts();
+                } catch (e) {
+                    console.error("Error deleting product: ", e);
+                    showMessage('Failed to delete product.', 'error');
+                }
             }
         }
         if (e.target.classList.contains('edit-btn')) {
@@ -866,7 +972,11 @@ if (adminContent) {
                     document.getElementById('product-category').value = product.category;
                     document.getElementById('product-sizes').value = (product.sizes || []).join(', ');
                     document.getElementById('product-colors').value = (product.colors || []).join(', ');
-                    document.getElementById('product-isFeatured').checked = product.isFeatured;
+                    document.getElementById('product-isFeatured').checked = product.isFeatured || false;
+
+                    // Switch to the products tab to show the form
+                    document.getElementById('tab-products').click();
+                    window.scrollTo(0, 0); // Scroll to top
                 }
             } catch (e) {
                 console.error("Error fetching product for edit: ", e);
