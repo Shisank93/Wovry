@@ -52,9 +52,12 @@
     <main class="py-12 px-4 md:px-8">
         <div class="max-w-7xl mx-auto flex flex-col md:flex-row gap-8">
             <aside class="md:w-1/4 p-6 bg-white rounded-lg shadow-lg filter-section">
-                <h3 class="text-2xl font-bold mb-6">Filters</h3>
+                <div class="flex justify-between items-center mb-6">
+                    <h3 class="text-2xl font-bold">Filters</h3>
+                    <button id="clear-filters-btn" class="text-sm text-gray-600 hover:text-red-500">Clear All</button>
+                </div>
                 <div class="mb-6">
-                    <h4 class="font-semibold mb-2">Category</h4>
+                    <h4 class="font-semibold mb-3">Category</h4>
                     <select id="category-filter" class="w-full p-2 border border-gray-300 rounded-md focus:outline-none">
                         <option value="all">All</option>
                         <option value="sweaters">Sweaters</option>
@@ -63,23 +66,33 @@
                     </select>
                 </div>
                 <div class="mb-6">
-                    <h4 class="font-semibold mb-2">Price Range</h4>
-                    <input type="range" id="price-range" min="10" max="200" value="200" class="w-full">
+                    <h4 class="font-semibold mb-3">Price Range</h4>
+                    <input type="range" id="price-range" min="1000" max="20000" value="20000" step="100" class="w-full">
                     <div class="flex justify-between text-sm text-gray-600 mt-1">
-                        <span>$10</span>
-                        <span id="price-value">$200</span>
+                        <span>₹1000</span>
+                        <span id="price-value">₹20000</span>
+                    </div>
+                </div>
+                <div id="size-filter-container" class="mb-6">
+                    <h4 class="font-semibold mb-3">Size</h4>
+                    <div id="size-options" class="space-y-2">
+                        <!-- Size checkboxes will be dynamically inserted here -->
+                    </div>
+                </div>
+                <div id="color-filter-container" class="mb-6">
+                    <h4 class="font-semibold mb-3">Color</h4>
+                    <div id="color-options" class="space-y-2">
+                        <!-- Color checkboxes will be dynamically inserted here -->
                     </div>
                 </div>
                 <div class="mb-6">
-                    <h4 class="font-semibold mb-2">Sort By</h4>
+                    <h4 class="font-semibold mb-3">Sort By</h4>
                     <select id="sort-by" class="w-full p-2 border border-gray-300 rounded-md focus:outline-none">
                         <option value="newest">Newest</option>
-                        <option value="popularity">Popularity</option>
                         <option value="price-asc">Price: Low to High</option>
                         <option value="price-desc">Price: High to Low</option>
                     </select>
                 </div>
-                <button id="apply-filters" class="btn-primary w-full py-3 rounded-md mt-4">Apply Filters</button>
             </aside>
             
             <div class="md:w-3/4">
