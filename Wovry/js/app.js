@@ -432,6 +432,10 @@ if (featuredProductsGrid) {
 // Shop Page Logic
 if (productGrid) {
     let allProducts = [];
+    let currentFilteredProducts = [];
+    let visibleProductCount = 0;
+    const productsPerPage = 9;
+
     let filters = {
         category: 'all',
         price: 20000,
@@ -449,6 +453,7 @@ if (productGrid) {
     const colorOptions = document.getElementById('color-options');
     const searchInput = document.getElementById('product-search');
     const clearFiltersBtn = document.getElementById('clear-filters-btn');
+    const loadMoreBtn = document.getElementById('load-more-btn');
 
     function populateFilters(products) {
         const sizes = [...new Set(products.flatMap(p => p.sizes || []))];
@@ -470,49 +475,68 @@ if (productGrid) {
     }
 
     function applyFilters() {
-        let filteredProducts = [...allProducts];
+        currentFilteredProducts = [...allProducts];
 
         // Filter by category
         if (filters.category !== 'all') {
-            filteredProducts = filteredProducts.filter(p => p.category === filters.category);
+            currentFilteredProducts = currentFilteredProducts.filter(p => p.category === filters.category);
         }
 
         // Filter by price
-        filteredProducts = filteredProducts.filter(p => p.price <= filters.price);
+        currentFilteredProducts = currentFilteredProducts.filter(p => p.price <= filters.price);
 
         // Filter by size
         if (filters.sizes.length > 0) {
-            filteredProducts = filteredProducts.filter(p => p.sizes && filters.sizes.every(size => p.sizes.includes(size)));
+            currentFilteredProducts = currentFilteredProducts.filter(p => p.sizes && filters.sizes.every(size => p.sizes.includes(size)));
         }
 
         // Filter by color
         if (filters.colors.length > 0) {
-            filteredProducts = filteredProducts.filter(p => p.colors && filters.colors.every(color => p.colors.includes(color)));
+            currentFilteredProducts = currentFilteredProducts.filter(p => p.colors && filters.colors.every(color => p.colors.includes(color)));
         }
 
         // Apply search term
         if (filters.searchTerm) {
-            filteredProducts = filteredProducts.filter(p => p.name.toLowerCase().includes(filters.searchTerm));
+            currentFilteredProducts = currentFilteredProducts.filter(p =>
+                (p.keywords && p.keywords.some(k => k.includes(filters.searchTerm))) ||
+                p.name.toLowerCase().includes(filters.searchTerm)
+            );
         }
 
         // Sort products
         if (filters.sortBy === 'price-asc') {
-            filteredProducts.sort((a, b) => a.price - b.price);
+            currentFilteredProducts.sort((a, b) => a.price - b.price);
         } else if (filters.sortBy === 'price-desc') {
-            filteredProducts.sort((a, b) => b.price - a.price);
+            currentFilteredProducts.sort((a, b) => b.price - a.price);
         } else if (filters.sortBy === 'newest') {
-            filteredProducts.sort((a, b) => b.createdAt.seconds - a.createdAt.seconds);
+            currentFilteredProducts.sort((a, b) => b.createdAt.seconds - a.createdAt.seconds);
         }
 
-        renderProducts(filteredProducts);
+        // Reset and render
+        productGrid.innerHTML = '';
+        visibleProductCount = 0;
+        renderProducts();
     }
 
-    function renderProducts(products) {
-        if (products.length === 0) {
+    function renderProducts() {
+        const productsToRender = currentFilteredProducts.slice(visibleProductCount, visibleProductCount + productsPerPage);
+
+        if (visibleProductCount === 0 && productsToRender.length === 0) {
             productGrid.innerHTML = '<p class="col-span-full text-center text-gray-500">No products match your filters.</p>';
+            loadMoreBtn.style.display = 'none';
             return;
         }
-        productGrid.innerHTML = products.map(createProductCard).join('');
+
+        const newHtml = productsToRender.map(createProductCard).join('');
+        productGrid.innerHTML += newHtml;
+        visibleProductCount += productsToRender.length;
+
+        // Show or hide the load more button
+        if (visibleProductCount < currentFilteredProducts.length) {
+            loadMoreBtn.style.display = 'block';
+        } else {
+            loadMoreBtn.style.display = 'none';
+        }
     }
 
     async function initializeShop() {
@@ -523,7 +547,6 @@ if (productGrid) {
             populateFilters(allProducts);
             applyFilters();
 
-            // Set initial price display
             if(priceValue && priceRange) {
                 priceValue.textContent = formatPrice(parseInt(priceRange.value));
             }
@@ -581,10 +604,11 @@ if (productGrid) {
         applyFilters();
     });
 
-    initializeShop();
+    loadMoreBtn?.addEventListener('click', () => {
+        renderProducts();
+    });
 
-    // Note: Load more button is removed for simplicity with client-side filtering.
-    // A more advanced implementation would require server-side pagination with filters.
+    initializeShop();
 }
 
 // Product Page Logic
@@ -657,18 +681,23 @@ if (cartItemsContainer) {
 
 // Checkout Page Logic
 if (checkoutForm) {
+    // Initialize Stripe with the publishable key
+    const stripe = Stripe('pk_test_51S4ivf4E7X4cBFilWAYYwnuT0VAYCJJ43WIPPaxe6I5Y52ldDwmVHh2Tv11WzTcPOhjwV4kzY06vHGkG9Gpy4vzF00S0E46ukd');
+
     renderOrderSummary();
+
     checkoutForm.addEventListener('submit', async (e) => {
         e.preventDefault();
         const user = auth.currentUser;
         const cart = getCart();
 
         if (cart.length === 0) {
-            showMessage('Your cart is empty!', 'error');
+            alert('Your cart is empty!');
             return;
         }
 
         const customerInfo = {
+            userId: user ? user.uid : null,
             name: document.getElementById('checkout-name').value,
             email: document.getElementById('checkout-email').value,
             phone: document.getElementById('checkout-phone').value,
@@ -678,23 +707,44 @@ if (checkoutForm) {
             zip: document.getElementById('checkout-zip').value,
         };
 
-        const order = {
-            userId: user ? user.uid : null,
-            customerInfo,
-            items: cart,
-            total: cart.reduce((total, item) => total + (item.price * item.quantity), 0),
-            status: "pending",
-            createdAt: new Date()
-        };
+        const checkoutButton = checkoutForm.querySelector('button[type="submit"]');
+        checkoutButton.disabled = true;
+        checkoutButton.textContent = 'Processing...';
 
         try {
-            await addDoc(collection(db, "orders"), order);
-            localStorage.removeItem('cart');
-            showMessage('Order placed successfully!', 'success');
-            window.location.href = 'index.html'; // Redirect to homepage
-        } catch (e) {
-            console.error("Error placing order: ", e);
-            showMessage('Failed to place order. Please try again.', 'error');
+            // URL for the cloud function
+            const functionUrl = 'https://us-central1-wovry-1873f.cloudfunctions.net/createCheckoutSession';
+
+            const response = await fetch(functionUrl, {
+                method: 'POST',
+                headers: {
+                    'Content-Type': 'application/json',
+                },
+                body: JSON.stringify({ items: cart, customerInfo: customerInfo }),
+            });
+
+            if (!response.ok) {
+                throw new Error('Failed to create checkout session.');
+            }
+
+            const session = await response.json();
+
+            // Redirect to Stripe Checkout
+            const { error } = await stripe.redirectToCheckout({
+                sessionId: session.id,
+            });
+
+            if (error) {
+                console.error('Stripe redirect error:', error);
+                alert(error.message);
+            }
+
+        } catch (error) {
+            console.error('Error during checkout:', error);
+            alert('Failed to proceed to payment. Please try again.');
+        } finally {
+            checkoutButton.disabled = false;
+            checkoutButton.textContent = 'Proceed to Payment';
         }
     });
 }
@@ -747,15 +797,29 @@ if (adminContent) {
         // Helper to process comma-separated strings into arrays
         const processStringToArray = (str) => str.split(',').map(item => item.trim()).filter(item => item);
 
+        const name = document.getElementById('product-name').value;
+        const description = document.getElementById('product-description').value;
+        const category = document.getElementById('product-category').value;
+
+        // Create a keywords array for searching
+        const keywords = [
+            ...name.toLowerCase().split(' '),
+            ...description.toLowerCase().split(' '),
+            category.toLowerCase()
+        ];
+        const uniqueKeywords = [...new Set(keywords.filter(k => k))];
+
+
         const product = {
-            name: document.getElementById('product-name').value,
+            name: name,
             imageUrl: document.getElementById('product-imageUrl').value,
-            description: document.getElementById('product-description').value,
+            description: description,
             price: parseFloat(document.getElementById('product-price').value),
-            category: document.getElementById('product-category').value,
+            category: category,
             sizes: processStringToArray(document.getElementById('product-sizes').value),
             colors: processStringToArray(document.getElementById('product-colors').value),
             isFeatured: document.getElementById('product-isFeatured').checked,
+            keywords: uniqueKeywords
         };
 
         try {
