@@ -3,7 +3,7 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Admin | Knit & Purl</title>
+    <title>Admin Dashboard | Knit & Purl</title>
     <script src="https://cdn.tailwindcss.com"></script>
     <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0-beta3/css/all.min.css">
     <link href="https://fonts.googleapis.com/css2?family=Playfair+Display:wght@700&family=Lato:wght@400;700&display=swap" rel="stylesheet">
@@ -12,111 +12,134 @@
         h1, h2, h3, h4 { font-family: 'Playfair Display', serif; }
         .btn-primary { background-color: #a0522d; color: white; transition: background-color 0.3s; }
         .btn-primary:hover { background-color: #8b4513; }
+        .tab-button.active { border-bottom: 2px solid #a0522d; color: #a0522d; }
     </style>
 </head>
-<body>
-    <!-- Header -->
-    <header class="bg-white shadow-sm sticky top-0 z-10 py-4 px-8">
-        <nav class="flex justify-between items-center max-w-7xl mx-auto">
-            <a href="index.html" class="text-2xl font-bold tracking-widest text-brown-900">KNIT & PURL</a>
-            <div class="hidden md:flex space-x-8">
-                <a href="shop.html" class="text-brown-900 hover:text-gray-600 transition-colors">Shop</a>
-                <a href="about.html" class="text-brown-900 hover:text-gray-600 transition-colors">About</a>
-                <a href="contact.html" class="text-brown-900 hover:text-gray-600 transition-colors">Contact</a>
-                <a href="profile.html" id="profile-link" class="text-brown-900 font-bold">Account</a>
-            </div>
-            <div class="flex items-center space-x-6">
-                <a href="cart.html" id="cart-icon" class="text-brown-900 hover:text-gray-600 transition-colors relative">
-                    <i class="fas fa-shopping-bag text-xl"></i>
-                    <span id="cart-count" class="absolute -top-2 -right-2 bg-red-500 text-white text-xs rounded-full h-4 w-4 flex items-center justify-center">0</span>
-                </a>
-                <a href="profile.html" id="login-link" class="md:hidden text-brown-900 hover:text-gray-600 transition-colors">
-                    <i class="fas fa-user-circle text-xl"></i>
-                </a>
-                <button id="dark-mode-toggle" class="text-brown-900 text-xl">
-                    <i class="fas fa-moon"></i>
-                </button>
-            </div>
-        </nav>
+<body class="bg-gray-100">
+
+    <header class="bg-white shadow-md">
+        <div class="max-w-7xl mx-auto py-6 px-4 sm:px-6 lg:px-8 flex justify-between items-center">
+            <h1 class="text-3xl font-bold text-gray-900">Admin Dashboard</h1>
+            <a href="index.html" class="text-sm text-gray-600 hover:text-gray-900">Back to Site</a>
+        </div>
     </header>
-    
-    <!-- Admin Section -->
-    <main class="py-12 px-4 md:px-8">
-        <div class="max-w-6xl mx-auto">
-            <h1 class="text-4xl font-bold mb-8 text-center">Admin Dashboard</h1>
-            
-            <div id="admin-not-authorized" class="hidden text-center text-red-500 font-semibold text-lg">
-                You are not authorized to view this page.
+
+    <main class="max-w-7xl mx-auto py-6 sm:px-6 lg:px-8">
+        <div id="admin-not-authorized" class="hidden text-center py-20">
+            <h2 class="text-2xl font-bold text-red-600">Access Denied</h2>
+            <p class="text-gray-600 mt-2">You are not authorized to view this page. Please sign in with an admin account.</p>
+        </div>
+
+        <div id="admin-content" class="hidden">
+            <!-- Tabs -->
+            <div class="mb-8">
+                <div class="border-b border-gray-200">
+                    <nav class="-mb-px flex space-x-8" aria-label="Tabs">
+                        <button id="tab-dashboard" class="tab-button whitespace-nowrap py-4 px-1 border-b-2 font-medium text-sm active">Dashboard</button>
+                        <button id="tab-products" class="tab-button whitespace-nowrap py-4 px-1 border-b-2 font-medium text-sm">Products</button>
+                        <button id="tab-orders" class="tab-button whitespace-nowrap py-4 px-1 border-b-2 font-medium text-sm">Orders</button>
+                        <button id="tab-customers" class="tab-button whitespace-nowrap py-4 px-1 border-b-2 font-medium text-sm">Customers</button>
+                    </nav>
+                </div>
             </div>
 
-            <div id="admin-content" class="hidden">
-                <div class="bg-white rounded-lg shadow-lg p-8 mb-8">
-                    <h2 class="text-3xl font-bold mb-4">Add/Update Product</h2>
-                    <form id="product-form">
-                        <input type="hidden" id="product-id-field">
-                        <div class="grid grid-cols-1 md:grid-cols-2 gap-4">
-                            <input type="text" id="product-name" placeholder="Product Name" required class="w-full p-3 border border-gray-300 rounded-lg">
-                            <input type="text" id="product-imageUrl" placeholder="Image URL" required class="w-full p-3 border border-gray-300 rounded-lg">
-                        </div>
-                        <div class="mt-4">
-                            <textarea id="product-description" placeholder="Product Description" required class="w-full p-3 border border-gray-300 rounded-lg h-24"></textarea>
-                        </div>
-                        <div class="grid grid-cols-1 md:grid-cols-2 gap-4 mt-4">
-                            <input type="number" id="product-price" placeholder="Price" required class="w-full p-3 border border-gray-300 rounded-lg">
-                            <select id="product-category" required class="w-full p-3 border border-gray-300 rounded-lg">
-                                <option value="">Select Category</option>
-                                <option value="sweaters">Sweaters</option>
-                                <option value="scarves">Scarves</option>
-                                <option value="caps">Caps</option>
-                            </select>
-                        </div>
-                        <div class="grid grid-cols-1 md:grid-cols-2 gap-4 mt-4">
-                            <input type="text" id="product-sizes" placeholder="Sizes (comma-separated, e.g. S,M,L)" class="w-full p-3 border border-gray-300 rounded-lg">
-                            <input type="text" id="product-colors" placeholder="Colors (comma-separated, e.g. Red,Blue)" class="w-full p-3 border border-gray-300 rounded-lg">
-                        </div>
-                        <div class="mt-4 flex items-center">
-                            <input type="checkbox" id="product-isFeatured" class="mr-2">
-                            <label for="product-isFeatured">Featured on Homepage</label>
-                        </div>
-                        <div class="mt-6 flex space-x-4">
-                            <button type="submit" class="btn-primary py-3 px-6 rounded-lg font-bold">Save Product</button>
-                            <button type="button" id="product-form-reset" class="py-3 px-6 rounded-lg bg-gray-300 text-gray-800 font-bold">Clear Form</button>
-                        </div>
-                    </form>
-                </div>
-
-                <div class="bg-white rounded-lg shadow-lg p-8 mb-8">
-                    <h2 class="text-3xl font-bold mb-4">Manage Products</h2>
-                    <div id="product-list" class="space-y-4">
-                        <!-- Product list will be dynamically loaded here -->
+            <!-- Tab Content -->
+            <div id="tab-content-dashboard" class="tab-content">
+                <h2 class="text-2xl font-bold mb-6">Analytics Overview</h2>
+                <div class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-6 mb-8">
+                    <!-- Total Revenue -->
+                    <div class="bg-white p-6 rounded-lg shadow">
+                        <h3 class="text-sm font-medium text-gray-500">Total Revenue</h3>
+                        <p id="stats-total-revenue" class="mt-1 text-3xl font-semibold text-gray-900">Loading...</p>
+                    </div>
+                    <!-- Total Orders -->
+                    <div class="bg-white p-6 rounded-lg shadow">
+                        <h3 class="text-sm font-medium text-gray-500">Total Orders</h3>
+                        <p id="stats-total-orders" class="mt-1 text-3xl font-semibold text-gray-900">Loading...</p>
+                    </div>
+                    <!-- Total Customers -->
+                    <div class="bg-white p-6 rounded-lg shadow">
+                        <h3 class="text-sm font-medium text-gray-500">Total Customers</h3>
+                        <p id="stats-total-customers" class="mt-1 text-3xl font-semibold text-gray-900">Loading...</p>
                     </div>
                 </div>
+                <div class="bg-white p-6 rounded-lg shadow">
+                    <h3 class="text-lg font-medium text-gray-900 mb-4">Top Selling Products</h3>
+                    <div id="stats-top-products" class="space-y-4">
+                        <p>Loading...</p>
+                    </div>
+                </div>
+            </div>
 
-                <div class="bg-white rounded-lg shadow-lg p-8">
-                    <h2 class="text-3xl font-bold mb-4">All Orders</h2>
-                    <div id="order-list" class="space-y-4">
-                        <!-- Order list will be dynamically loaded here -->
+            <div id="tab-content-products" class="tab-content hidden">
+                <h2 class="text-2xl font-bold mb-6">Manage Products</h2>
+                <div class="grid grid-cols-1 md:grid-cols-3 gap-8">
+                    <div class="md:col-span-1">
+                        <div class="bg-white p-6 rounded-lg shadow">
+                            <h3 class="text-xl font-bold mb-4">Add/Edit Product</h3>
+                            <form id="product-form" class="space-y-4">
+                                <input type="hidden" id="product-id-field">
+                                <div>
+                                    <label for="product-name" class="block text-sm font-medium text-gray-700">Name</label>
+                                    <input type="text" id="product-name" class="mt-1 block w-full rounded-md border-gray-300 shadow-sm focus:border-indigo-500 focus:ring-indigo-500 sm:text-sm" required>
+                                </div>
+                                <div>
+                                    <label for="product-description" class="block text-sm font-medium text-gray-700">Description</label>
+                                    <textarea id="product-description" rows="3" class="mt-1 block w-full rounded-md border-gray-300 shadow-sm focus:border-indigo-500 focus:ring-indigo-500 sm:text-sm" required></textarea>
+                                </div>
+                                <div>
+                                    <label for="product-imageUrl" class="block text-sm font-medium text-gray-700">Image URL</label>
+                                    <input type="url" id="product-imageUrl" class="mt-1 block w-full rounded-md border-gray-300 shadow-sm focus:border-indigo-500 focus:ring-indigo-500 sm:text-sm" required>
+                                </div>
+                                <div>
+                                    <label for="product-price" class="block text-sm font-medium text-gray-700">Price</label>
+                                    <input type="number" id="product-price" step="0.01" class="mt-1 block w-full rounded-md border-gray-300 shadow-sm focus:border-indigo-500 focus:ring-indigo-500 sm:text-sm" required>
+                                </div>
+                                <div>
+                                    <label for="product-category" class="block text-sm font-medium text-gray-700">Category</label>
+                                    <input type="text" id="product-category" class="mt-1 block w-full rounded-md border-gray-300 shadow-sm focus:border-indigo-500 focus:ring-indigo-500 sm:text-sm" required>
+                                </div>
+                                <div>
+                                    <label for="product-sizes" class="block text-sm font-medium text-gray-700">Sizes (comma-separated)</label>
+                                    <input type="text" id="product-sizes" class="mt-1 block w-full rounded-md border-gray-300 shadow-sm focus:border-indigo-500 focus:ring-indigo-500 sm:text-sm">
+                                </div>
+                                <div>
+                                    <label for="product-colors" class="block text-sm font-medium text-gray-700">Colors (comma-separated)</label>
+                                    <input type="text" id="product-colors" class="mt-1 block w-full rounded-md border-gray-300 shadow-sm focus:border-indigo-500 focus:ring-indigo-500 sm:text-sm">
+                                </div>
+                                <div class="flex items-center">
+                                    <input id="product-isFeatured" type="checkbox" class="h-4 w-4 rounded border-gray-300 text-indigo-600 focus:ring-indigo-500">
+                                    <label for="product-isFeatured" class="ml-2 block text-sm text-gray-900">Featured Product</label>
+                                </div>
+                                <button type="submit" class="btn-primary w-full py-2 px-4 rounded-md">Save Product</button>
+                            </form>
+                        </div>
+                    </div>
+                    <div class="md:col-span-2">
+                        <div class="bg-white p-6 rounded-lg shadow">
+                            <h3 class="text-xl font-bold mb-4">Product List</h3>
+                            <div id="product-list" class="space-y-4"></div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+
+            <div id="tab-content-orders" class="tab-content hidden">
+                <h2 class="text-2xl font-bold mb-6">Manage Orders</h2>
+                <div id="order-list" class="space-y-4 bg-white p-6 rounded-lg shadow"></div>
+            </div>
+
+            <div id="tab-content-customers" class="tab-content hidden">
+                <h2 class="text-2xl font-bold mb-6">Customer List</h2>
+                <div class="bg-white p-6 rounded-lg shadow">
+                    <div id="customer-list" class="space-y-4">
+                        <p>Loading customers...</p>
                     </div>
                 </div>
             </div>
         </div>
     </main>
-    
-    <!-- Footer -->
-    <footer class="bg-brown-900 text-white py-12 px-8 mt-12">
-        <div class="max-w-7xl mx-auto flex flex-col md:flex-row justify-between items-center text-center md:text-left">
-            <div class="mb-6 md:mb-0">
-                <h3 class="text-2xl font-bold mb-2">KNIT & PURL</h3>
-                <p>&copy; 2023 All rights reserved.</p>
-            </div>
-            <div class="flex space-x-6 text-2xl">
-                <a href="#" class="hover:text-gray-400"><i class="fab fa-instagram"></i></a>
-                <a href="#" class="hover:text-gray-400"><i class="fab fa-facebook-f"></i></a>
-                <a href="#" class="hover:text-gray-400"><i class="fab fa-pinterest"></i></a>
-            </div>
-        </div>
-    </footer>
-    
+
     <script type="module" src="https://www.gstatic.com/firebasejs/10.7.1/firebase-app.js"></script>
     <script type="module" src="https://www.gstatic.com/firebasejs/10.7.1/firebase-firestore.js"></script>
     <script type="module" src="https://www.gstatic.com/firebasejs/10.7.1/firebase-auth.js"></script>
