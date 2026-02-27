@@ -1,20 +1,43 @@
 <!DOCTYPE html>
 <html lang="en">
+
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>Checkout | Knit & Purl</title>
     <script src="https://cdn.tailwindcss.com"></script>
     <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0-beta3/css/all.min.css">
-    <link href="https://fonts.googleapis.com/css2?family=Playfair+Display:wght@700&family=Lato:wght@400;700&display=swap" rel="stylesheet">
+    <link rel="stylesheet" href="css/style.css">
+    <link
+        href="https://fonts.googleapis.com/css2?family=Playfair+Display:wght@700&family=Lato:wght@400;700&display=swap"
+        rel="stylesheet">
     <script src="https://js.stripe.com/v3/"></script>
     <style>
-        body { font-family: 'Lato', sans-serif; background-color: #f7f3e8; color: #333; }
-        h1, h2, h3, h4 { font-family: 'Playfair Display', serif; }
-        .btn-primary { background-color: #a0522d; color: white; transition: background-color 0.3s; }
-        .btn-primary:hover { background-color: #8b4513; }
+        body {
+            font-family: 'Lato', sans-serif;
+            background-color: #f7f3e8;
+            color: #333;
+        }
+
+        h1,
+        h2,
+        h3,
+        h4 {
+            font-family: 'Playfair Display', serif;
+        }
+
+        .btn-primary {
+            background-color: #a0522d;
+            color: white;
+            transition: background-color 0.3s;
+        }
+
+        .btn-primary:hover {
+            background-color: #8b4513;
+        }
     </style>
 </head>
+
 <body>
     <!-- Header -->
     <header class="bg-white shadow-sm sticky top-0 z-10 py-4 px-8">
@@ -24,14 +47,18 @@
                 <a href="shop.html" class="text-brown-900 hover:text-gray-600 transition-colors">Shop</a>
                 <a href="about.html" class="text-brown-900 hover:text-gray-600 transition-colors">About</a>
                 <a href="contact.html" class="text-brown-900 hover:text-gray-600 transition-colors">Contact</a>
-                <a href="profile.html" id="profile-link" class="text-brown-900 hover:text-gray-600 transition-colors">Account</a>
+                <a href="profile.html" id="profile-link"
+                    class="text-brown-900 hover:text-gray-600 transition-colors">Account</a>
             </div>
             <div class="flex items-center space-x-6">
-                <a href="cart.html" id="cart-icon" class="text-brown-900 hover:text-gray-600 transition-colors relative">
+                <a href="cart.html" id="cart-icon"
+                    class="text-brown-900 hover:text-gray-600 transition-colors relative">
                     <i class="fas fa-shopping-bag text-xl"></i>
-                    <span id="cart-count" class="absolute -top-2 -right-2 bg-red-500 text-white text-xs rounded-full h-4 w-4 flex items-center justify-center">0</span>
+                    <span id="cart-count"
+                        class="absolute -top-2 -right-2 bg-red-500 text-white text-xs rounded-full h-4 w-4 flex items-center justify-center">0</span>
                 </a>
-                <a href="profile.html" id="login-link" class="md:hidden text-brown-900 hover:text-gray-600 transition-colors">
+                <a href="profile.html" id="login-link"
+                    class="md:hidden text-brown-900 hover:text-gray-600 transition-colors">
                     <i class="fas fa-user-circle text-xl"></i>
                 </a>
                 <button id="dark-mode-toggle" class="text-brown-900 text-xl">
@@ -48,42 +75,100 @@
                 <h1 class="text-3xl font-bold mb-6">Shipping Information</h1>
                 <form id="checkout-form">
                     <div class="grid grid-cols-1 md:grid-cols-2 gap-4 mb-4">
-                        <input type="text" id="checkout-name" placeholder="Full Name" required class="w-full p-3 border border-gray-300 rounded-lg focus:outline-none">
-                        <input type="email" id="checkout-email" placeholder="Email" required class="w-full p-3 border border-gray-300 rounded-lg focus:outline-none">
+                        <input type="text" id="checkout-name" placeholder="Full Name" required
+                            class="w-full p-3 border border-gray-300 rounded-lg focus:outline-none">
+                        <input type="email" id="checkout-email" placeholder="Email" required
+                            class="w-full p-3 border border-gray-300 rounded-lg focus:outline-none">
                     </div>
                     <div class="mb-4">
-                        <input type="tel" id="checkout-phone" placeholder="Phone Number" required class="w-full p-3 border border-gray-300 rounded-lg focus:outline-none">
+                        <input type="tel" id="checkout-phone" placeholder="Phone Number" required
+                            class="w-full p-3 border border-gray-300 rounded-lg focus:outline-none">
                     </div>
                     <div class="mb-4">
-                        <input type="text" id="checkout-address" placeholder="Address Line 1" required class="w-full p-3 border border-gray-300 rounded-lg focus:outline-none">
+                        <input type="text" id="checkout-address" placeholder="Address Line 1" required
+                            class="w-full p-3 border border-gray-300 rounded-lg focus:outline-none">
                     </div>
                     <div class="mb-4">
-                        <input type="text" id="checkout-city" placeholder="City" required class="w-full p-3 border border-gray-300 rounded-lg focus:outline-none">
+                        <input type="text" id="checkout-city" placeholder="City" required
+                            class="w-full p-3 border border-gray-300 rounded-lg focus:outline-none">
                     </div>
                     <div class="grid grid-cols-1 md:grid-cols-2 gap-4 mb-6">
-                        <input type="text" id="checkout-state" placeholder="State / Province" required class="w-full p-3 border border-gray-300 rounded-lg focus:outline-none">
-                        <input type="text" id="checkout-zip" placeholder="ZIP / Postal Code" required class="w-full p-3 border border-gray-300 rounded-lg focus:outline-none">
+                        <input type="text" id="checkout-state" placeholder="State / Province" required
+                            class="w-full p-3 border border-gray-300 rounded-lg focus:outline-none">
+                        <input type="text" id="checkout-zip" placeholder="ZIP / Postal Code" required
+                            class="w-full p-3 border border-gray-300 rounded-lg focus:outline-none">
                     </div>
                     <h2 class="text-2xl font-bold mb-4">Payment</h2>
                     <div class="bg-gray-100 p-4 rounded-lg text-gray-600 text-sm">
                         You will be redirected to our secure payment partner, Stripe, to complete your purchase.
                     </div>
-                    <button type="submit" class="btn-primary w-full py-4 rounded-lg text-lg font-bold mt-6">Proceed to Payment</button>
+                    <button type="submit" class="btn-primary w-full py-4 rounded-lg text-lg font-bold mt-6">Proceed to
+                        Payment</button>
                 </form>
             </div>
-            
+
             <div class="bg-white rounded-lg shadow-lg p-8">
                 <h2 class="text-3xl font-bold mb-6">Order Summary</h2>
                 <div id="order-summary-items" class="border-b border-gray-200 pb-4 mb-4">
                     <!-- Cart items will be loaded here -->
                 </div>
-                <div class="flex justify-between text-xl font-semibold mb-2">
-                    <span>Subtotal</span>
-                    <span id="summary-subtotal">$0.00</span>
+
+                <!-- Coupon Code -->
+                <div class="mb-4">
+                    <label class="block text-sm font-semibold text-gray-700 mb-2">Coupon Code</label>
+                    <div class="flex gap-2">
+                        <input type="text" id="coupon-input" placeholder="e.g. WELCOME10"
+                            class="flex-grow p-3 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-amber-500 text-sm">
+                        <button id="apply-coupon-btn"
+                            class="btn-primary px-5 py-3 rounded-lg text-sm font-semibold">Apply</button>
+                    </div>
+                    <p id="coupon-message" class="text-sm mt-1 hidden"></p>
                 </div>
-                <div class="flex justify-between text-xl font-semibold border-t border-gray-200 pt-4">
+
+                <div class="space-y-2 text-gray-600 mb-4">
+                    <div class="flex justify-between">
+                        <span>Subtotal</span>
+                        <span id="summary-subtotal">₹0.00</span>
+                    </div>
+                    <div id="discount-row" class="flex justify-between text-green-600 hidden">
+                        <span>Discount</span>
+                        <span id="summary-discount">-₹0.00</span>
+                    </div>
+                    <div class="flex justify-between">
+                        <span>Shipping</span>
+                        <span id="summary-shipping">₹0.00</span>
+                    </div>
+                    <p id="shipping-message" class="text-xs text-gray-400"></p>
+                </div>
+                <div class="flex justify-between text-xl font-bold border-t border-gray-200 pt-4 mb-6">
                     <span>Total</span>
-                    <span id="summary-total">$0.00</span>
+                    <span id="summary-total">₹0.00</span>
+                </div>
+
+                <!-- Payment Method -->
+                <h3 class="text-lg font-bold mb-3">Payment Method</h3>
+                <div class="space-y-3 mb-6">
+                    <label
+                        class="flex items-center gap-3 p-3 border-2 rounded-lg cursor-pointer has-[:checked]:border-amber-600 has-[:checked]:bg-amber-50 transition-all">
+                        <input type="radio" name="payment-method" value="stripe" checked
+                            class="text-amber-600 focus:ring-amber-500">
+                        <i class="fab fa-stripe text-xl text-blue-600"></i>
+                        <span class="font-medium">Pay with Card (Stripe)</span>
+                    </label>
+                    <label
+                        class="flex items-center gap-3 p-3 border-2 rounded-lg cursor-pointer has-[:checked]:border-amber-600 has-[:checked]:bg-amber-50 transition-all">
+                        <input type="radio" name="payment-method" value="razorpay"
+                            class="text-amber-600 focus:ring-amber-500">
+                        <i class="fas fa-credit-card text-xl text-blue-500"></i>
+                        <span class="font-medium">Pay with Razorpay</span>
+                    </label>
+                    <label
+                        class="flex items-center gap-3 p-3 border-2 rounded-lg cursor-pointer has-[:checked]:border-amber-600 has-[:checked]:bg-amber-50 transition-all">
+                        <input type="radio" name="payment-method" value="cod"
+                            class="text-amber-600 focus:ring-amber-500">
+                        <i class="fas fa-money-bill-wave text-xl text-green-600"></i>
+                        <span class="font-medium">Cash on Delivery</span>
+                    </label>
                 </div>
             </div>
         </div>
@@ -91,15 +176,44 @@
 
     <!-- Footer -->
     <footer class="bg-brown-900 text-white py-12 px-8 mt-12">
-        <div class="max-w-7xl mx-auto flex flex-col md:flex-row justify-between items-center text-center md:text-left">
-            <div class="mb-6 md:mb-0">
-                <h3 class="text-2xl font-bold mb-2">KNIT & PURL</h3>
-                <p>&copy; 2023 All rights reserved.</p>
+        <div class="max-w-7xl mx-auto">
+            <div class="grid grid-cols-1 md:grid-cols-4 gap-8">
+                <div>
+                    <h3 class="text-2xl font-bold mb-3">KNIT &amp; PURL</h3>
+                    <p class="text-sm text-gray-300">Handcrafted woolen wear from the heart of India.</p>
+                </div>
+                <div>
+                    <h4 class="font-bold mb-3">Quick Links</h4>
+                    <div class="flex flex-col gap-2 text-sm text-gray-300">
+                        <a href="shop.html" class="hover:text-white">Shop</a>
+                        <a href="about.html" class="hover:text-white">About Us</a>
+                        <a href="artisan.html" class="hover:text-white">Meet the Artisans</a>
+                        <a href="track-order.html" class="hover:text-white">Track Order</a>
+                    </div>
+                </div>
+                <div>
+                    <h4 class="font-bold mb-3">Support</h4>
+                    <div class="flex flex-col gap-2 text-sm text-gray-300">
+                        <a href="contact.html" class="hover:text-white">Contact Us</a>
+                        <a href="return-policy.html" class="hover:text-white">Return Policy</a>
+                    </div>
+                </div>
+                <div>
+                    <h4 class="font-bold mb-3">Contact</h4>
+                    <div class="space-y-2 text-sm text-gray-300">
+                        <p><i class="fas fa-phone mr-2"></i><a href="tel:+919389480953" class="hover:text-white">+91-9389480953</a></p>
+                        <p><i class="fas fa-envelope mr-2"></i><a href="mailto:shisankyadav3@gmail.com" class="hover:text-white">shisankyadav3@gmail.com</a></p>
+                        <p><i class="fas fa-map-marker-alt mr-2"></i>Shikohabad, UP 283135</p>
+                    </div>
+                    <div class="flex space-x-4 text-xl mt-4">
+                        <a href="#" class="hover:text-gray-400"><i class="fab fa-instagram"></i></a>
+                        <a href="#" class="hover:text-gray-400"><i class="fab fa-facebook-f"></i></a>
+                        <a href="https://wa.me/919389480953" target="_blank" class="hover:text-gray-400"><i class="fab fa-whatsapp"></i></a>
+                    </div>
+                </div>
             </div>
-            <div class="flex space-x-6 text-2xl">
-                <a href="#" class="hover:text-gray-400"><i class="fab fa-instagram"></i></a>
-                <a href="#" class="hover:text-gray-400"><i class="fab fa-facebook-f"></i></a>
-                <a href="#" class="hover:text-gray-400"><i class="fab fa-pinterest"></i></a>
+            <div class="border-t border-gray-700 mt-8 pt-6 text-center text-sm text-gray-400">
+                <p>&amp;copy; 2024 Knit &amp; Purl. All rights reserved.</p>
             </div>
         </div>
     </footer>
@@ -107,6 +221,7 @@
     <script type="module" src="https://www.gstatic.com/firebasejs/10.7.1/firebase-app.js"></script>
     <script type="module" src="https://www.gstatic.com/firebasejs/10.7.1/firebase-firestore.js"></script>
     <script type="module" src="https://www.gstatic.com/firebasejs/10.7.1/firebase-auth.js"></script>
-    <script type="module" src="js/app.js"></script>
+    <script type="module" src="js/main.js"></script>
 </body>
+
 </html>
